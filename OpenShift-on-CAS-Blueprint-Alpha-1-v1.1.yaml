@@ -1,0 +1,367 @@
+formatVersion: 1
+name: OCPonvRAC
+version: 1
+description: Installs OpenShift 3.11 automatically on vSphere Env. using vRAC
+inputs:
+  clusterName:
+    type: string
+    title: Cluster Name
+    description: Please enter the name of the Cluster. Node names will be generated based on the cluster name.
+  rhnUser:
+    type: string
+    title: RHN Subscription User
+    description: Please enter the name of the RHN Subscription User.
+  rhnPass:
+    type: string
+    encrypted: true
+    title: RHN User Password
+    description: Please enter the password for the RHN Subscription User.
+  subDomain:
+    type: string
+    title: Sub Domain
+    description: Please enter the subdomain name wehre the cluster will be e.g. exmple.com.
+  clusterWildcardSubdomain:
+    type: string
+    title: Cluster WildCard Sub Domain
+    default: apps.<cluster name>.<sub-domain>
+    description: This is the the wild card DNS for the application traffic for the cluster. The default is apps.cluster_name.subdomain.
+  adDomain:
+    type: string
+    title: Active Directory Domain
+    description: The AD domain. It will be used to identify the identity provider. E.g. HCRA.
+  ldapServer:
+    type: string
+    title: LDAP Server
+    description: The URL of the ldap server that OCP masters will connect.
+  adCnUser:
+    type: string
+    title: Active Directory Base DN for Users
+    description: 'LDAP common name where the OCP users will be.e.g. CN=Users,DC=example,DC=com'
+  adCnGroups:
+    type: string
+    title: Active Directory Base DN for Groups
+    description: 'LDAP common name where the OCP groups will be.e.g. CN=Users,DC=example,DC=com'
+  adBindUser:
+    type: string
+    title: Active Directory Bind user
+    description: User to authenticate to the LDAP to retrieve objects. Must reside within ad_cn_users parameter.
+  adBindPassword:
+    type: string
+    encrypted: true
+    title: Active Directory Bind user password
+    description: Password of the bind user to authenticate to the LDAP to retrieve objects. Automation will eventually generate a key file from this password.
+  adAuthGroup:
+    type: string
+    title: AD auth group for user authentication
+    description: Group on AD to be used for authentication. Must be the within ad_cn_groups.
+  adCertFile:
+    type: string
+    title: AD certificate file
+    description: It can be the actual content of the file or a path where admin node will retrieve (automation will copy to the admin node at /root/. e.g. ca.crt
+resources:
+  admin_node:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      image: openshift-admin
+      flavor: openshift-admin
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-admin-01"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      clusterWildcardSubdomain: '${input.clusterWildcardSubdomain}'
+      adDomain: '${input.adDomain}'
+      ldapServer: '${input.ldapServer}'
+      adCnUser: '${input.adCnUser}'
+      adCnGroups: '${input.adCnGroups}'
+      adBindUser: '${input.adBindUser}'
+      adBindPassword: '${input.adBindPassword}'
+      adAuthGroup: '${input.adAuthGroup}'
+      adCertFile: '${input.adCertFile}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  master_node_1:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 2
+    properties:
+      image: openshift-master
+      flavor: openshift-master
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-master-01"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  master_node_2:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 3
+    properties:
+      image: openshift-master
+      flavor: openshift-master
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-master-02"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  master_node_3:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 4
+    properties:
+      image: openshift-master
+      flavor: openshift-master
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-master-03"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  infra_node_1:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 5
+    properties:
+      image: openshift-infra
+      flavor: openshift-infra
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-infra-01"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  infra_node_2:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 6
+    properties:
+      image: openshift-infra
+      flavor: openshift-infra
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-infra-02"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  infra_node_3:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 7
+    properties:
+      image: openshift-infra
+      flavor: openshift-infra
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-infra-03"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  app_node_1:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 8
+    properties:
+      image: openshift-app
+      flavor: openshift-app
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-app-01"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  app_node_2:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 9
+    properties:
+      image: openshift-app
+      flavor: openshift-app
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-app-02"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  app_node_3:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 10
+    properties:
+      image: openshift-app
+      flavor: openshift-app
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-app-03"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  Cloud_vSphere_Network_1:
+    type: Cloud.vSphere.Network
+    metadata:
+      layoutPosition:
+        - 0
+        - 0
+    properties:
+      name: HCRA-vcenter-network
+      networkType: existing
+      constraints:
+        - tag: 'type:vcenter'
+  haproxy_node_1:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 0
+    properties:
+      image: openshift-haproxy
+      flavor: openshift-haproxy
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-haproxy-01"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  haproxy_node_2:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 11
+    properties:
+      image: openshift-haproxy
+      flavor: openshift-haproxy
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-haproxy-02"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
+  haproxy_node_3:
+    type: Cloud.vSphere.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 12
+    properties:
+      image: openshift-haproxy
+      flavor: openshift-haproxy
+      networks:
+        - name: '${resource.Cloud_vSphere_Network_1.name}'
+          network: '${resource.Cloud_vSphere_Network_1.id}'
+      customizationSpec: linux-spec
+      hostname: '${input.clusterName + "-haproxy-03"}'
+      enable_openshift: 'true'
+      clusterName: '${input.clusterName}'
+      rhnUser: '${input.rhnUser}'
+      rhnPass: '${input.rhnPass}'
+      subDomain: '${input.subDomain}'
+      constraints:
+        - tag: 'type:vcenter'
+        - tag: 'vmtype:workload'
